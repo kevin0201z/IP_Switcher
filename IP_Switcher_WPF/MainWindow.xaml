@@ -5,12 +5,16 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
         Title="IP切换器"
-        Height="500"
+        Height="530"
         Width="830"
         WindowStartupLocation="CenterScreen"
         ResizeMode="NoResize"
         Background="#f8f9fa">
     <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="283*"/>
+            <ColumnDefinition Width="132*"/>
+        </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="60"/>
             <RowDefinition Height="*"/>
@@ -18,7 +22,7 @@
         </Grid.RowDefinitions>
 
         <!-- 顶部标题栏 -->
-        <Border Grid.Row="0">
+        <Border Grid.Row="0" Grid.ColumnSpan="2">
             <Border.Background>
                 <SolidColorBrush Color="#FF7B177B"/>
             </Border.Background>
@@ -31,7 +35,7 @@
         </Border>
 
         <!-- 主要内容区域 -->
-        <Grid Grid.Row="1">
+        <Grid Grid.Row="1" Grid.ColumnSpan="2" Margin="0,0,0,70" Grid.RowSpan="2">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
@@ -49,17 +53,19 @@
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
                     <Label Content="选择网卡:" VerticalAlignment="Center" FontSize="13" Foreground="#333333" FontWeight="SemiBold" Padding="0,0,5,0"/>
-                    <ComboBox Grid.Column="1" Margin="5,0,15,0" x:Name="nicComboBox" VerticalAlignment="Center" Height="32" FontSize="13" Style="{StaticResource ModernComboBox}"/>
+                    <ComboBox Grid.Column="1" Margin="5,0,15,0" ItemsSource="{Binding NicList}" SelectedItem="{Binding SelectedNic}" VerticalAlignment="Center" Height="32" FontSize="13" Style="{StaticResource ModernComboBox}"/>
 
                     <!-- 当前配置显示框 -->
-                    <Border Grid.Column="2" Margin="0,0,0,0" Background="#f0f0f0" CornerRadius="6" Padding="10" HorizontalAlignment="Stretch">
+                    <Border Grid.Column="2" Margin="0,0,0,0" Background="#f0f0f0" CornerRadius="6" Padding="10" HorizontalAlignment="Stretch" Height="120">
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="*"/>
                             </Grid.RowDefinitions>
                             <TextBlock Text="当前配置:" FontSize="12" FontWeight="SemiBold" Foreground="#666666" Margin="0,0,0,4"/>
-                            <TextBlock Grid.Row="1" x:Name="currentConfigText" FontSize="12" Foreground="#333333" TextWrapping="Wrap"/>
+                            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Hidden">
+                                <TextBlock Text="{Binding CurrentConfigText}" FontSize="12" Foreground="#333333" TextWrapping="Wrap"/>
+                            </ScrollViewer>
                         </Grid>
                     </Border>
                 </Grid>
@@ -72,15 +78,15 @@
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
 
-                <Border Background="White" CornerRadius="6" Padding="15" Margin="0,0,0,8">
+                <Border Grid.Row="0" Background="White" CornerRadius="6" Padding="15" Margin="0,0,0,8">
                     <Border.Effect>
                         <DropShadowEffect ShadowDepth="1" BlurRadius="3" Opacity="0.1"/>
                     </Border.Effect>
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="网络配置:" FontSize="13" FontWeight="SemiBold" Foreground="#333333" VerticalAlignment="Center"/>
-                        <Button Content="➕ 添加" Margin="15,0,0,0" x:Name="addButton" Width="75" Height="32" Background="#3498db" Foreground="White" BorderThickness="0" FontSize="12" Style="{StaticResource ModernButton}"/>
-                        <Button Content="✏️ 编辑" Margin="10,0,0,0" x:Name="editButton" Width="75" Height="32" Background="#f39c12" Foreground="White" BorderThickness="0" FontSize="12" Style="{StaticResource ModernButton}"/>
-                        <Button Content="🗑️ 删除" Margin="10,0,0,0" x:Name="deleteButton" Width="75" Height="32" Background="#e74c3c" Foreground="White" BorderThickness="0" FontSize="12" Style="{StaticResource ModernButton}"/>
+                        <Button Content="➕ 添加" Margin="15,0,0,0" x:Name="addButton" Width="75" Height="32" Background="#3498db" Foreground="White" BorderThickness="0" FontSize="12" Style="{StaticResource ModernButton}" Command="{Binding AddConfigCommand}"/>
+                        <Button Content="✏️ 编辑" Margin="10,0,0,0" x:Name="editButton" Width="75" Height="32" Background="#f39c12" Foreground="White" BorderThickness="0" FontSize="12" Style="{StaticResource ModernButton}" Command="{Binding EditConfigCommand}"/>
+                        <Button Content="🗑️ 删除" Margin="10,0,0,0" x:Name="deleteButton" Width="75" Height="32" Background="#e74c3c" Foreground="White" BorderThickness="0" FontSize="12" Style="{StaticResource ModernButton}" Command="{Binding DeleteConfigCommand}"/>
                     </StackPanel>
                 </Border>
 
@@ -88,7 +94,7 @@
                     <Border.Effect>
                         <DropShadowEffect ShadowDepth="2" BlurRadius="5" Opacity="0.12"/>
                     </Border.Effect>
-                    <ListView x:Name="configListView" BorderThickness="0" Background="White">
+                    <ListView x:Name="configListView" BorderThickness="0" Background="White" ItemsSource="{Binding Configs}" SelectedItem="{Binding SelectedConfig}">
                         <ListView.View>
                             <GridView>
                                 <GridViewColumn Header="配置名称" Width="110" DisplayMemberBinding="{Binding Name}"/>
@@ -104,10 +110,10 @@
         </Grid>
 
         <!-- 底部按钮区域 -->
-        <Border Grid.Row="2" Background="White" BorderThickness="0,1,0,0" BorderBrush="#e0e0e0" Padding="15">
+        <Border Grid.Row="2" Background="White" BorderThickness="0,1,0,0" BorderBrush="#e0e0e0" Padding="15" Grid.ColumnSpan="2">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-                <Button Content="✓ 应用配置" x:Name="applyButton" Width="110" Height="36" Background="#27ae60" Foreground="White" BorderThickness="0" FontSize="12" FontWeight="SemiBold" Margin="0,0,10,0" Style="{StaticResource ModernButton}"/>
-                <Button Content="✕ 退出" x:Name="exitButton" Width="110" Height="36" Background="#95a5a6" Foreground="White" BorderThickness="0" FontSize="12" FontWeight="SemiBold" Style="{StaticResource ModernButton}"/>
+                <Button Content="✓ 应用配置" x:Name="applyButton" Width="110" Height="36" Background="#27ae60" Foreground="White" BorderThickness="0" FontSize="12" FontWeight="SemiBold" Margin="0,0,10,0" Style="{StaticResource ModernButton}" Command="{Binding ApplyConfigCommand}"/>
+                <Button Content="✕ 退出" x:Name="exitButton" Width="110" Height="36" Background="#95a5a6" Foreground="White" BorderThickness="0" FontSize="12" FontWeight="SemiBold" Style="{StaticResource ModernButton}" Command="{Binding ExitCommand}"/>
             </StackPanel>
         </Border>
     </Grid>

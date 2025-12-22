@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Text;
+using IP_Switcher.Interfaces;
 
 namespace IP_Switcher
 {
@@ -9,6 +10,7 @@ namespace IP_Switcher
     /// </summary>
     public enum LogLevel
     {
+        Debug,
         Info,
         Warning,
         Error
@@ -32,6 +34,18 @@ namespace IP_Switcher
             {
                 Directory.CreateDirectory(logDirectory);
             }
+            
+            // 清理旧日志（保留最近7天）
+            CleanOldLogs();
+        }
+
+        /// <summary>
+        /// 写入调试日志
+        /// </summary>
+        /// <param name="message">日志消息</param>
+        public void Debug(string message)
+        {
+            WriteLog(LogLevel.Debug, message);
         }
 
         /// <summary>
@@ -79,6 +93,10 @@ namespace IP_Switcher
         /// <param name="message">日志消息</param>
         private void WriteLog(LogLevel level, string message)
         {
+            if (level < LogLevel.Warning)
+            {
+                return;
+            }
             lock (lockObject)
             {
                 try

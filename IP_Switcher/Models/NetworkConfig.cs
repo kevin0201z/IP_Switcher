@@ -1,17 +1,11 @@
-using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
-using System.Runtime.Serialization;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace IP_Switcher.Models
 {
     /// <summary>
     /// 网络配置模型
     /// </summary>
-    [DataContract]
     public class NetworkConfig : INotifyPropertyChanged
     {
         private string _name;
@@ -38,7 +32,6 @@ namespace IP_Switcher.Models
         /// <summary>
         /// 配置名称
         /// </summary>
-        [DataMember(Name = "Name")]
         public string Name
         {
             get { return _name; }
@@ -55,7 +48,6 @@ namespace IP_Switcher.Models
         /// <summary>
         /// 网卡名称
         /// </summary>
-        [DataMember(Name = "NicName")]
         public string NicName
         {
             get { return _nicName; }
@@ -72,7 +64,6 @@ namespace IP_Switcher.Models
         /// <summary>
         /// IP地址
         /// </summary>
-        [DataMember(Name = "IPAddress")]
         public string IPAddress
         {
             get { return _ipAddress; }
@@ -89,7 +80,6 @@ namespace IP_Switcher.Models
         /// <summary>
         /// 子网掩码
         /// </summary>
-        [DataMember(Name = "SubnetMask")]
         public string SubnetMask
         {
             get { return _subnetMask; }
@@ -106,7 +96,6 @@ namespace IP_Switcher.Models
         /// <summary>
         /// 默认网关
         /// </summary>
-        [DataMember(Name = "DefaultGateway")]
         public string DefaultGateway
         {
             get { return _defaultGateway; }
@@ -123,7 +112,6 @@ namespace IP_Switcher.Models
         /// <summary>
         /// DNS服务器列表
         /// </summary>
-        [DataMember(Name = "DnsServers")]
         public List<string> DnsServers
         {
             get { return _dnsServers; }

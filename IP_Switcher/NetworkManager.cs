@@ -12,6 +12,27 @@ namespace IP_Switcher
     public class NetworkManager : INetworkManager
     {
         /// <summary>
+        /// 错误事件，用于通知调用者发生的错误
+        /// </summary>
+        public event EventHandler<NetworkErrorEventArgs> ErrorOccurred;
+
+        /// <summary>
+        /// 触发错误事件
+        /// </summary>
+        /// <param name="errorMessage">错误消息</param>
+        /// <param name="exception">异常对象</param>
+        protected virtual void OnErrorOccurred(string errorMessage, Exception exception = null)
+        {
+            ErrorOccurred?.Invoke(this, new NetworkErrorEventArgs(errorMessage, exception));
+            Console.WriteLine($"错误: {errorMessage}");
+            if (exception != null)
+            {
+                Console.WriteLine($"异常: {exception.Message}");
+                Console.WriteLine($"堆栈跟踪: {exception.StackTrace}");
+            }
+        }
+
+        /// <summary>
         /// 获取所有可用网卡信息
         /// </summary>
         /// <returns>网卡信息列表</returns>
@@ -37,7 +58,7 @@ namespace IP_Switcher
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"获取网卡信息失败: {ex.Message}");
+                OnErrorOccurred("获取网卡信息失败", ex);
             }
             
             return nicList;
@@ -62,7 +83,7 @@ namespace IP_Switcher
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"获取指定网卡信息失败: {ex.Message}");
+                OnErrorOccurred("获取指定网卡信息失败", ex);
             }
             
             return null;
@@ -120,7 +141,7 @@ namespace IP_Switcher
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"获取当前IP配置失败: {ex.Message}");
+                OnErrorOccurred("获取当前IP配置失败", ex);
             }
             
             return config;
@@ -145,6 +166,58 @@ namespace IP_Switcher
         }
         
         /// <summary>
+        /// 验证IP地址格式是否正确
+        /// </summary>
+        /// <param name="ipAddress">IP地址</param>
+        /// <returns>是否为有效的IP地址</returns>
+        public bool IsValidIpAddress(string ipAddress)
+        {
+            if (string.IsNullOrEmpty(ipAddress))
+                return false;
+            
+            return System.Net.IPAddress.TryParse(ipAddress, out _);
+        }
+
+        /// <summary>
+        /// 验证网络配置是否有效
+        /// </summary>
+        /// <param name="config">网络配置</param>
+        /// <returns>是否为有效的网络配置</returns>
+        public bool IsValidNetworkConfig(NetworkConfig config)
+        {
+            if (config == null)
+                return false;
+            
+            // 如果是DHCP配置，无需验证IP地址等参数
+            if (string.IsNullOrEmpty(config.IPAddress) || string.IsNullOrEmpty(config.SubnetMask))
+                return true;
+            
+            // 验证IP地址格式
+            if (!IsValidIpAddress(config.IPAddress))
+                return false;
+            
+            // 验证子网掩码格式
+            if (!IsValidIpAddress(config.SubnetMask))
+                return false;
+            
+            // 验证默认网关格式（如果填写）
+            if (!string.IsNullOrEmpty(config.DefaultGateway) && !IsValidIpAddress(config.DefaultGateway))
+                return false;
+            
+            // 验证DNS服务器格式（如果填写）
+            if (config.DnsServers != null)
+            {
+                foreach (string dns in config.DnsServers)
+                {
+                    if (!string.IsNullOrEmpty(dns) && !IsValidIpAddress(dns))
+                        return false;
+                }
+            }
+            
+            return true;
+        }
+
+        /// <summary>
         /// 设置网卡IP配置
         /// </summary>
         /// <param name="nicName">网卡名称</param>
@@ -157,7 +230,7 @@ namespace IP_Switcher
                 // 检查是否以管理员权限运行
                 if (!IsRunningAsAdmin())
                 {
-                    Console.WriteLine("设置IP配置需要管理员权限");
+                    OnErrorOccurred("设置IP配置需要管理员权限");
                     return false;
                 }
                 
@@ -168,6 +241,13 @@ namespace IP_Switcher
                 }
                 else
                 {
+                    // 验证输入参数格式
+                    if (!IsValidNetworkConfig(config))
+                    {
+                        Console.WriteLine("无效的网络配置格式");
+                        return false;
+                    }
+                    
                     // 设置为静态IP
                     // 构建设置IP地址的命令，根据是否有网关条件性添加
                     string setAddressCommand = $"netsh interface ip set address name=\"{nicName}\" source=static addr={config.IPAddress} mask={config.SubnetMask}";
@@ -227,7 +307,7 @@ namespace IP_Switcher
                 // 检查是否以管理员权限运行
                 if (!IsRunningAsAdmin())
                 {
-                    Console.WriteLine("设置DHCP配置需要管理员权限");
+                    OnErrorOccurred("设置DHCP配置需要管理员权限");
                     return false;
                 }
                 
@@ -238,23 +318,32 @@ namespace IP_Switcher
                 ExecuteCommand($"netsh interface ip set dns name=\"{nicName}\" source=dhcp");
                 
                 // DHCP配置后需要时间从服务器获取IP，添加延迟后重试验证
-                for (int i = 0; i < 5; i++) // 最多重试5次
+                const int MAX_RETRIES = 10; // 最多重试10次
+                const int INITIAL_DELAY_MS = 500; // 初始延迟500毫秒
+                const int MAX_DELAY_MS = 3000; // 最大延迟3000毫秒
+                
+                for (int i = 0; i < MAX_RETRIES; i++)
                 {
-                    System.Threading.Thread.Sleep(1000); // 每次重试间隔1秒
+                    // 计算当前重试的延迟时间（指数退避策略）
+                    int delayMs = Math.Min(INITIAL_DELAY_MS * (int)Math.Pow(2, i), MAX_DELAY_MS);
+                    System.Threading.Thread.Sleep(delayMs);
                     
                     NetworkConfig currentConfig = GetCurrentIpConfig(nicName);
                     if (!string.IsNullOrEmpty(currentConfig.IPAddress))
                     {
+                        Console.WriteLine($"DHCP配置成功，获取到IP地址: {currentConfig.IPAddress}");
                         return true;
                     }
+                    
+                    Console.WriteLine($"DHCP配置重试 {i+1}/{MAX_RETRIES}，等待 {delayMs} 毫秒后再次检查");
                 }
                 
-                Console.WriteLine("DHCP配置验证失败，未能在规定时间内获取到IP地址");
+                OnErrorOccurred("DHCP配置验证失败，未能在规定时间内获取到IP地址");
                 return false;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"设置DHCP配置失败: {ex.Message}");
+                OnErrorOccurred("设置DHCP配置失败", ex);
                 return false;
             }
         }

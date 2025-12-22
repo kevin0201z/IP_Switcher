@@ -1,12 +1,18 @@
 using System;
 
-namespace IP_Switcher
+namespace IP_Switcher.Interfaces
 {
     /// <summary>
     /// 日志接口，定义了日志记录的操作
     /// </summary>
     public interface ILogger
     {
+        /// <summary>
+        /// 写入调试日志
+        /// </summary>
+        /// <param name="message">日志消息</param>
+        void Debug(string message);
+
         /// <summary>
         /// 写入信息日志
         /// </summary>

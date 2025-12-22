@@ -10,6 +10,11 @@ namespace IP_Switcher
     public interface INetworkManager
     {
         /// <summary>
+        /// 错误事件，用于通知调用者发生的错误
+        /// </summary>
+        event EventHandler<NetworkErrorEventArgs> ErrorOccurred;
+
+        /// <summary>
         /// 获取所有可用网卡信息
         /// </summary>
         /// <returns>网卡信息列表</returns>
@@ -36,5 +41,53 @@ namespace IP_Switcher
         /// <param name="config">网络配置</param>
         /// <returns>是否设置成功</returns>
         bool SetIpConfig(string nicName, NetworkConfig config);
+
+        /// <summary>
+        /// 设置网卡为DHCP自动获取IP
+        /// </summary>
+        /// <param name="nicName">网卡名称</param>
+        /// <returns>是否设置成功</returns>
+        bool SetDhcpConfig(string nicName);
+
+        /// <summary>
+        /// 验证IP地址格式是否正确
+        /// </summary>
+        /// <param name="ipAddress">IP地址</param>
+        /// <returns>是否为有效的IP地址</returns>
+        bool IsValidIpAddress(string ipAddress);
+
+        /// <summary>
+        /// 验证网络配置是否有效
+        /// </summary>
+        /// <param name="config">网络配置</param>
+        /// <returns>是否为有效的网络配置</returns>
+        bool IsValidNetworkConfig(NetworkConfig config);
+    }
+
+    /// <summary>
+    /// 网络错误事件参数
+    /// </summary>
+    public class NetworkErrorEventArgs : EventArgs
+    {
+        /// <summary>
+        /// 错误消息
+        /// </summary>
+        public string ErrorMessage { get; set; }
+
+        /// <summary>
+        /// 异常对象
+        /// </summary>
+        public Exception Exception { get; set; }
+
+        /// <summary>
+        /// 构造函数
+        /// </summary>
+        /// <param name="errorMessage">错误消息</param>
+        /// <param name="exception">异常对象</param>
+        public NetworkErrorEventArgs(string errorMessage, Exception exception = null)
+        {
+            ErrorMessage = errorMessage;
+            Exception = exception;
+        }
     }
 }

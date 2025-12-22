@@ -1,8 +1,7 @@
-﻿<Application x:Class="IP_Switcher_WPF.App"
+<Application x:Class="IP_Switcher_WPF.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:IP_Switcher_WPF"
-             StartupUri="MainWindow.xaml">
+             xmlns:local="clr-namespace:IP_Switcher_WPF">
     <Application.Resources>
         <!-- Color Definitions -->
         <Color x:Key="PrimaryColor">#3498db</Color>

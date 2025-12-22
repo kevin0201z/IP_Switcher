@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using IP_Switcher;
 using IP_Switcher.Models;
 using IP_Switcher.Interfaces;
 
@@ -69,6 +68,12 @@ namespace IP_Switcher.Tests
     {
         public NetworkConfig CurrentConfig = new NetworkConfig(); // 初始化默认配置，避免空引用
         public bool SetCalled = false;
+        
+        // 实现新增的接口成员
+        public event EventHandler<NetworkErrorEventArgs> ErrorOccurred;
+        public bool IsValidIpAddress(string ipAddress) => true;
+        public bool IsValidNetworkConfig(NetworkConfig config) => true;
+        
         public List<NicInfo> GetAllNetworkAdapters() => new List<NicInfo>();
         public NicInfo GetNetworkAdapterByName(string nicName) => new NicInfo { Name = nicName };
         public NetworkConfig GetCurrentIpConfig(string nicName) => CurrentConfig;
@@ -102,6 +107,7 @@ namespace IP_Switcher.Tests
     class FakeLogger : ILogger
     {
         public List<string> Logs = new List<string>();
+        public void Debug(string message) => Logs.Add(message);
         public void Info(string message) => Logs.Add(message);
         public void Warning(string message) => Logs.Add(message);
         public void Error(string message) => Logs.Add(message);

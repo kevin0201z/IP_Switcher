@@ -2,9 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.Serialization;
-using System.Runtime.Serialization.Json;
-using System.Text;
+using System.Text.Json;
 using IP_Switcher.Models;
 
 namespace IP_Switcher
@@ -38,12 +36,9 @@ namespace IP_Switcher
             {
                 if (File.Exists(configPath))
                 {
-                    using (FileStream stream = new FileStream(configPath, FileMode.Open, FileAccess.Read))
-                    {
-                        DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof(ConfigRoot));
-                        ConfigRoot root = (ConfigRoot)serializer.ReadObject(stream);
-                        configs = root.Configurations;
-                    }
+                    string jsonString = File.ReadAllText(configPath);
+                    ConfigRoot root = JsonSerializer.Deserialize<ConfigRoot>(jsonString);
+                    configs = root?.Configurations ?? new List<NetworkConfig>();
                 }
                 else
                 {
@@ -71,12 +66,9 @@ namespace IP_Switcher
             {
                 if (File.Exists(defaultConfigPath))
                 {
-                    using (FileStream stream = new FileStream(defaultConfigPath, FileMode.Open, FileAccess.Read))
-                    {
-                        DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof(ConfigRoot));
-                        ConfigRoot root = (ConfigRoot)serializer.ReadObject(stream);
-                        return string.IsNullOrWhiteSpace(root.LastNic) ? null : root.LastNic;
-                    }
+                    string jsonString = File.ReadAllText(defaultConfigPath);
+                    ConfigRoot root = JsonSerializer.Deserialize<ConfigRoot>(jsonString);
+                    return string.IsNullOrWhiteSpace(root?.LastNic) ? null : root.LastNic;
                 }
             }
             catch (Exception)
@@ -96,20 +88,14 @@ namespace IP_Switcher
                 ConfigRoot root = new ConfigRoot();
                 if (File.Exists(defaultConfigPath))
                 {
-                    using (FileStream stream = new FileStream(defaultConfigPath, FileMode.Open, FileAccess.Read))
-                    {
-                        DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof(ConfigRoot));
-                        root = (ConfigRoot)serializer.ReadObject(stream) ?? new ConfigRoot();
-                    }
+                    string jsonString = File.ReadAllText(defaultConfigPath);
+                    root = JsonSerializer.Deserialize<ConfigRoot>(jsonString) ?? new ConfigRoot();
                 }
 
                 root.LastNic = nicName ?? string.Empty;
 
-                using (FileStream stream = new FileStream(defaultConfigPath, FileMode.Create, FileAccess.Write))
-                {
-                    DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof(ConfigRoot));
-                    serializer.WriteObject(stream, root);
-                }
+                string updatedJson = JsonSerializer.Serialize(root, new JsonSerializerOptions { WriteIndented = true });
+                File.WriteAllText(defaultConfigPath, updatedJson);
             }
             catch (Exception)
             {
@@ -155,11 +141,8 @@ namespace IP_Switcher
                 
                 ConfigRoot root = new ConfigRoot { Configurations = defaultConfigs };
                 
-                using (FileStream stream = new FileStream(configPath, FileMode.Create, FileAccess.Write))
-                {
-                    DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof(ConfigRoot));
-                    serializer.WriteObject(stream, root);
-                }
+                string jsonString = JsonSerializer.Serialize(root, new JsonSerializerOptions { WriteIndented = true });
+                File.WriteAllText(configPath, jsonString);
                 
                 Console.WriteLine($"已创建默认配置文件: {configPath}");
             }
@@ -189,14 +172,11 @@ namespace IP_Switcher
                 {
                     try
                     {
-                        using (FileStream rstream = new FileStream(configPath, FileMode.Open, FileAccess.Read))
+                        string existingJson = File.ReadAllText(configPath);
+                        ConfigRoot existing = JsonSerializer.Deserialize<ConfigRoot>(existingJson);
+                        if (existing != null)
                         {
-                            DataContractJsonSerializer rserializer = new DataContractJsonSerializer(typeof(ConfigRoot));
-                            ConfigRoot existing = (ConfigRoot)rserializer.ReadObject(rstream);
-                            if (existing != null)
-                            {
-                                root.LastNic = existing.LastNic;
-                            }
+                            root.LastNic = existing.LastNic;
                         }
                     }
                     catch
@@ -205,11 +185,8 @@ namespace IP_Switcher
                     }
                 }
                 
-                using (FileStream stream = new FileStream(configPath, FileMode.Create, FileAccess.Write))
-                {
-                    DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof(ConfigRoot));
-                    serializer.WriteObject(stream, root);
-                }
+                string jsonString = JsonSerializer.Serialize(root, new JsonSerializerOptions { WriteIndented = true });
+                File.WriteAllText(configPath, jsonString);
                 
                 Console.WriteLine($"配置已保存到文件: {configPath}");
             }
@@ -234,13 +211,10 @@ namespace IP_Switcher
     /// <summary>
     /// 配置文件根对象
     /// </summary>
-    [DataContract]
     internal class ConfigRoot
     {
-        [DataMember(Name = "Configurations")]
         public List<NetworkConfig> Configurations { get; set; }
 
-        [DataMember(Name = "LastNic", IsRequired = false, EmitDefaultValue = false)]
         public string LastNic { get; set; }
         
         public ConfigRoot()
@@ -253,25 +227,18 @@ namespace IP_Switcher
     /// <summary>
     /// 网络配置数据契约
     /// </summary>
-    [DataContract]
     public class NetworkConfigDataContract
     {
-        [DataMember(Name = "Name")]
         public string Name { get; set; }
         
-        [DataMember(Name = "NicName")]
         public string NicName { get; set; }
         
-        [DataMember(Name = "IPAddress")]
         public string IPAddress { get; set; }
         
-        [DataMember(Name = "SubnetMask")]
         public string SubnetMask { get; set; }
         
-        [DataMember(Name = "DefaultGateway")]
         public string DefaultGateway { get; set; }
         
-        [DataMember(Name = "DnsServers")]
         public List<string> DnsServers { get; set; }
         
         public NetworkConfigDataContract()

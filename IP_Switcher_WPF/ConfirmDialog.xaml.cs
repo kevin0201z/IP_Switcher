@@ -22,7 +22,7 @@ namespace IP_Switcher_WPF
         // 新网络配置
         private NetworkConfig _newConfig;
         // 网络管理器
-        private NetworkManager _networkManager;
+        private readonly INetworkManager _networkManager;
         // 网卡名称
         private string _nicName;
 
@@ -38,7 +38,7 @@ namespace IP_Switcher_WPF
         /// <param name="nicName">网卡名称</param>
         /// <param name="originalConfig">原始网络配置（用于还原）</param>
         /// <param name="newConfig">新网络配置</param>
-        public ConfirmDialog(NetworkManager networkManager, string nicName, NetworkConfig originalConfig, NetworkConfig newConfig)
+        public ConfirmDialog(INetworkManager networkManager, string nicName, NetworkConfig originalConfig, NetworkConfig newConfig)
         {
             InitializeComponent();
             
