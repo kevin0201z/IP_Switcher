@@ -286,6 +286,8 @@ namespace IP_Switcher_WPF
                         if (editConfigWindow.ShowDialog() == true)
                         {
                             NetworkConfig updatedConfig = editConfigWindow.Config;
+                            // 替换ObservableCollection中的项，确保UI刷新
+                            _configs[index] = null;
                             _configs[index] = updatedConfig;
                             // 保存配置时排除DHCP配置项
                             _configManager.SaveConfig(_configs.Where(c => c.Name != DHCP_CONFIG_NAME).ToList());
@@ -372,7 +374,11 @@ namespace IP_Switcher_WPF
                 _logger.Info($"开始应用配置 '{selectedConfig.Name}' 到网卡 '{selectedNicName}'");
                 if (MessageBox.Show($"确定要将配置 '{selectedConfig.Name}' 应用到网卡 '{selectedNicName}' 吗?", "确认应用", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
                 {
+                    // 保存原始配置（用于还原）
+                    NetworkConfig originalConfig = _networkManager.GetCurrentIpConfig(selectedNicName);
+                    
                     bool result;
+                    NetworkConfig appliedConfig;
                     
                     if (IsDhcpConfig(selectedConfig))
                     {
@@ -381,6 +387,7 @@ namespace IP_Switcher_WPF
                         {
                             NicName = selectedNicName
                         };
+                        appliedConfig = dhcpConfig;
                         _logger.Info($"正在为网卡 '{selectedNicName}' 设置DHCP");
                         result = _networkManager.SetIpConfig(selectedNicName, dhcpConfig);
                     }
@@ -388,6 +395,7 @@ namespace IP_Switcher_WPF
                     {
                         // 如果是静态配置，正常设置
                         selectedConfig.NicName = selectedNicName;
+                        appliedConfig = selectedConfig;
                         _logger.Info($"正在为网卡 '{selectedNicName}' 设置静态IP: {selectedConfig.IPAddress}");
                         result = _networkManager.SetIpConfig(selectedNicName, selectedConfig);
                     }
@@ -395,7 +403,24 @@ namespace IP_Switcher_WPF
                     if (result)
                     {
                         _logger.Info($"配置 '{selectedConfig.Name}' 应用到网卡 '{selectedNicName}' 成功");
-                        MessageBox.Show("配置应用成功", "成功", MessageBoxButton.OK, MessageBoxImage.Information);
+                        
+                        // 打开确认对话框，显示倒计时
+                        ConfirmDialog confirmDialog = new ConfirmDialog(_networkManager, selectedNicName, originalConfig, appliedConfig);
+                        bool? dialogResult = confirmDialog.ShowDialog();
+                        
+                        if (dialogResult == true)
+                        {
+                            // 用户确认，保持新配置
+                            _logger.Info($"用户确认了配置 '{selectedConfig.Name}'");
+                            MessageBox.Show("配置应用成功并已确认", "成功", MessageBoxButton.OK, MessageBoxImage.Information);
+                        }
+                        else
+                        {
+                            // 用户取消或倒计时结束，已自动还原
+                            _logger.Info($"配置 '{selectedConfig.Name}' 未被确认，已自动还原");
+                            MessageBox.Show("配置已还原", "已还原", MessageBoxButton.OK, MessageBoxImage.Information);
+                        }
+                        
                         // 应用成功后更新当前配置显示
                         OnNicSelected();
                     }

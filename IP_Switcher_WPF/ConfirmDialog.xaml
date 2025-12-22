@@ -1,0 +1,37 @@
+<Window x:Class="IP_Switcher_WPF.ConfirmDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="确认IP切换"
+        Height="200"
+        Width="400"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="NoResize"
+        Background="#f8f9fa"
+        Topmost="True"
+        Loaded="Window_Loaded">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        
+        <!-- 主要内容区域 -->
+        <StackPanel Grid.Row="0" Margin="20" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <TextBlock Text="IP配置已切换，是否确认？" FontSize="16" FontWeight="SemiBold" Foreground="#333333" HorizontalAlignment="Center" Margin="0,0,0,15"/>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <TextBlock Text="如果" FontSize="14" Foreground="#666666" VerticalAlignment="Center"/>
+                <TextBlock x:Name="countdownText" Text="10" FontSize="18" FontWeight="Bold" Foreground="#e74c3c" Margin="5" VerticalAlignment="Center"/>
+                <TextBlock Text="秒内未确认，将自动还原" FontSize="14" Foreground="#666666" VerticalAlignment="Center"/>
+            </StackPanel>
+        </StackPanel>
+        
+        <!-- 按钮区域 -->
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,20">
+            <Button Content="✅ 确认" x:Name="confirmButton" Width="100" Height="36" Background="#27ae60" Foreground="White" BorderThickness="0" FontSize="12" FontWeight="SemiBold" Margin="0,0,10,0" Style="{StaticResource ModernButton}"/>
+            <Button Content="🔄 立即还原" x:Name="restoreButton" Width="100" Height="36" Background="#e74c3c" Foreground="White" BorderThickness="0" FontSize="12" FontWeight="SemiBold" Style="{StaticResource ModernButton}"/>
+        </StackPanel>
+    </Grid>
+</Window>

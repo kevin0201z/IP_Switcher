@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
@@ -11,43 +12,131 @@ namespace IP_Switcher.Models
     /// 网络配置模型
     /// </summary>
     [DataContract]
-    public class NetworkConfig
+    public class NetworkConfig : INotifyPropertyChanged
     {
+        private string _name;
+        private string _nicName;
+        private string _ipAddress;
+        private string _subnetMask;
+        private string _defaultGateway;
+        private List<string> _dnsServers;
+
+        /// <summary>
+        /// 属性变化事件
+        /// </summary>
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        /// <summary>
+        /// 触发属性变化事件
+        /// </summary>
+        /// <param name="propertyName">属性名称</param>
+        protected void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
         /// <summary>
         /// 配置名称
         /// </summary>
         [DataMember(Name = "Name")]
-        public string Name { get; set; }
+        public string Name
+        {
+            get { return _name; }
+            set
+            {
+                if (_name != value)
+                {
+                    _name = value;
+                    OnPropertyChanged(nameof(Name));
+                }
+            }
+        }
 
         /// <summary>
         /// 网卡名称
         /// </summary>
         [DataMember(Name = "NicName")]
-        public string NicName { get; set; }
+        public string NicName
+        {
+            get { return _nicName; }
+            set
+            {
+                if (_nicName != value)
+                {
+                    _nicName = value;
+                    OnPropertyChanged(nameof(NicName));
+                }
+            }
+        }
 
         /// <summary>
         /// IP地址
         /// </summary>
         [DataMember(Name = "IPAddress")]
-        public string IPAddress { get; set; }
+        public string IPAddress
+        {
+            get { return _ipAddress; }
+            set
+            {
+                if (_ipAddress != value)
+                {
+                    _ipAddress = value;
+                    OnPropertyChanged(nameof(IPAddress));
+                }
+            }
+        }
 
         /// <summary>
         /// 子网掩码
         /// </summary>
         [DataMember(Name = "SubnetMask")]
-        public string SubnetMask { get; set; }
+        public string SubnetMask
+        {
+            get { return _subnetMask; }
+            set
+            {
+                if (_subnetMask != value)
+                {
+                    _subnetMask = value;
+                    OnPropertyChanged(nameof(SubnetMask));
+                }
+            }
+        }
 
         /// <summary>
         /// 默认网关
         /// </summary>
         [DataMember(Name = "DefaultGateway")]
-        public string DefaultGateway { get; set; }
+        public string DefaultGateway
+        {
+            get { return _defaultGateway; }
+            set
+            {
+                if (_defaultGateway != value)
+                {
+                    _defaultGateway = value;
+                    OnPropertyChanged(nameof(DefaultGateway));
+                }
+            }
+        }
 
         /// <summary>
         /// DNS服务器列表
         /// </summary>
         [DataMember(Name = "DnsServers")]
-        public List<string> DnsServers { get; set; }
+        public List<string> DnsServers
+        {
+            get { return _dnsServers; }
+            set
+            {
+                if (_dnsServers != value)
+                {
+                    _dnsServers = value;
+                    OnPropertyChanged(nameof(DnsServers));
+                    OnPropertyChanged(nameof(DnsDisplayString));
+                }
+            }
+        }
 
         /// <summary>
         /// 用于UI显示的DNS服务器字符串
