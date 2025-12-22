@@ -1,0 +1,54 @@
+# 操作系统生成的文件
+Thumbs.db
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+
+# IDE配置文件
+.vs/
+.idea/
+*.suo
+*.swp
+*.swo
+*~
+
+# 构建输出
+bin/
+obj/
+
+# 日志文件
+Logs/
+
+# 配置文件
+config.json
+
+# 测试结果
+TestResults/
+
+# NuGet包
+packages/
+*.nupkg
+.nuget/
+
+# 临时文件
+*.tmp
+*.temp
+*.log
+
+# 证书文件
+*.pfx
+*.p12
+
+# 发布配置文件
+*.pubxml
+*.publishsettings
+
+# 其他
+*.user
+*.cache
+*.cachefile
+*.vspscc
+*.vssscc

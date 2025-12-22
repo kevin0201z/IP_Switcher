@@ -1,0 +1,15 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": ".NET Framework Launch",
+      "type": "clr",
+      "request": "launch",
+      "program": "${workspaceFolder}/IP_Switcher/bin/Debug/IP_Switcher.exe",
+      "cwd": "${workspaceFolder}/IP_Switcher",
+      "stopAtEntry": false,
+      "console": "externalTerminal",
+      "preLaunchTask": "build"
+    }
+  ]
+}
