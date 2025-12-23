@@ -448,10 +448,12 @@ namespace IP_Switcher_WPF
 
                     if (MessageBox.Show($"确定要删除配置 '{SelectedConfig.Name}' 吗?", "确认删除", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
                     {
+                        // 保存要删除的配置名称
+                        string configName = SelectedConfig.Name;
                         Configs.Remove(SelectedConfig);
                         // 保存配置时排除DHCP配置项
                         _configManager.SaveConfig(Configs.Where(c => c.Name != DHCP_CONFIG_NAME).ToList());
-                        _logger.Info($"成功删除配置: {SelectedConfig.Name}");
+                        _logger.Info($"成功删除配置: {configName}");
                     }
                     else
                     {

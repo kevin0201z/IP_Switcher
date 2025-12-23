@@ -5,125 +5,118 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
         Title="编辑网络配置"
-        Height="520"
-        Width="500"
-        WindowStartupLocation="CenterOwner"
+        Height="600"
+        Width="520"
+        WindowStartupLocation="CenterScreen"
         ResizeMode="NoResize"
         Background="#f8f9fa">
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="60"/>
-            <RowDefinition Height="*"/>
             <RowDefinition Height="70"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="80"/>
         </Grid.RowDefinitions>
 
         <!-- 顶部标题栏 -->
-        <Border Grid.Row="0" Background="#FF7B177B">
+        <Border Grid.Row="0">
+            <Border.Background>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                    <GradientStop Color="#FF7B177B" Offset="0"/>
+                    <GradientStop Color="#FF9B479B" Offset="1"/>
+                </LinearGradientBrush>
+            </Border.Background>
             <Border.Effect>
-                <DropShadowEffect ShadowDepth="3" BlurRadius="8" Opacity="0.15"/>
+                <DropShadowEffect ShadowDepth="4" BlurRadius="10" Opacity="0.2"/>
             </Border.Effect>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                <TextBlock Text="编辑网络配置" FontSize="22" FontWeight="Bold" Foreground="White"/>
+                <TextBlock Text="编辑网络配置" FontSize="24" FontWeight="Bold" Foreground="White" Effect="{StaticResource TextShadow}"/>
             </StackPanel>
         </Border>
 
         <!-- 主要内容区域 -->
-        <Grid Grid.Row="1">
+        <Grid Grid.Row="1" Margin="10">
             <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <!-- 配置名称 -->
-            <Border Grid.Row="0" Margin="12,10,12,6" Background="White" CornerRadius="6" Padding="12">
+            <!-- 统一的编辑区域 -->
+            <Border Grid.Row="0" Margin="15,15,15,15" Background="White" CornerRadius="8" Padding="25" BorderThickness="1" BorderBrush="#e0e0e0">
                 <Border.Effect>
-                    <DropShadowEffect ShadowDepth="1" BlurRadius="3" Opacity="0.1"/>
-                </Border.Effect>
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="80"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    <Label Content="配置名称:" VerticalAlignment="Center" FontSize="12" Foreground="#333333" FontWeight="SemiBold" Padding="0,0,5,0"/>
-                    <TextBox Grid.Column="1" Margin="5,0,0,0" x:Name="nameTextBox" VerticalAlignment="Center" Height="30" FontSize="12" Style="{StaticResource ModernTextBox}"/>
-                </Grid>
-            </Border>
-
-            <!-- IP地址 -->
-            <Border Grid.Row="1" Margin="12,0,12,6" Background="White" CornerRadius="6" Padding="12">
-                <Border.Effect>
-                    <DropShadowEffect ShadowDepth="1" BlurRadius="3" Opacity="0.1"/>
-                </Border.Effect>
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="80"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    <Label Content="IP地址:" VerticalAlignment="Center" FontSize="12" Foreground="#333333" FontWeight="SemiBold" Padding="0,0,5,0"/>
-                    <TextBox Grid.Column="1" Margin="5,0,0,0" x:Name="ipTextBox" VerticalAlignment="Center" Height="30" FontSize="12" Style="{StaticResource ModernTextBox}"/>
-                </Grid>
-            </Border>
-
-            <!-- 子网掩码 -->
-            <Border Grid.Row="2" Margin="12,0,12,6" Background="White" CornerRadius="6" Padding="12">
-                <Border.Effect>
-                    <DropShadowEffect ShadowDepth="1" BlurRadius="3" Opacity="0.1"/>
-                </Border.Effect>
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="80"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    <Label Content="子网掩码:" VerticalAlignment="Center" FontSize="12" Foreground="#333333" FontWeight="SemiBold" Padding="0,0,5,0"/>
-                    <TextBox Grid.Column="1" Margin="5,0,0,0" x:Name="maskTextBox" VerticalAlignment="Center" Height="30" FontSize="12" Style="{StaticResource ModernTextBox}"/>
-                </Grid>
-            </Border>
-
-            <!-- 默认网关 -->
-            <Border Grid.Row="3" Margin="12,0,12,6" Background="White" CornerRadius="6" Padding="12">
-                <Border.Effect>
-                    <DropShadowEffect ShadowDepth="1" BlurRadius="3" Opacity="0.1"/>
-                </Border.Effect>
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="80"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    <Label Content="默认网关:" VerticalAlignment="Center" FontSize="12" Foreground="#333333" FontWeight="SemiBold" Padding="0,0,5,0"/>
-                    <TextBox Grid.Column="1" Margin="5,0,0,0" x:Name="gatewayTextBox" VerticalAlignment="Center" Height="30" FontSize="12" Style="{StaticResource ModernTextBox}"/>
-                </Grid>
-            </Border>
-
-            <!-- DNS服务器 -->
-            <Border Grid.Row="4" Margin="12,0,12,8" Background="White" CornerRadius="6" Padding="12">
-                <Border.Effect>
-                    <DropShadowEffect ShadowDepth="1" BlurRadius="3" Opacity="0.1"/>
+                    <DropShadowEffect ShadowDepth="2" BlurRadius="8" Opacity="0.15"/>
                 </Border.Effect>
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="60"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
-                    <Label Content="DNS服务器:" FontSize="12" Foreground="#333333" FontWeight="SemiBold" Padding="0,0,0,5"/>
-                    <TextBox Grid.Row="1" x:Name="dnsTextBox" FontSize="12" Style="{StaticResource ModernTextBox}" AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"/>
-                </Grid>
-            </Border>
+                    
+                    <!-- 配置名称 -->
+                    <Grid Grid.Row="0" Margin="0,0,0,15">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="90"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Label Content="配置名称:" VerticalAlignment="Center" FontSize="14" Foreground="#444444" FontWeight="SemiBold" Padding="0,0,10,0"/>
+                        <TextBox Grid.Column="1" Margin="5,0,0,0" x:Name="nameTextBox" VerticalAlignment="Center" Height="36" FontSize="13" Style="{StaticResource ModernTextBox}"/>
+                    </Grid>
 
-            <!-- 提示信息 -->
-            <Border Grid.Row="5" Margin="12,0,12,10" Background="#e8f4f8" CornerRadius="6" Padding="10">
-                <TextBlock Text="💡 提示：每行输入一个DNS服务器地址，支持IPv4格式" FontSize="11" Foreground="#2c5aa0"/>
+                    <!-- IP地址 -->
+                    <Grid Grid.Row="1" Margin="0,0,0,15">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="90"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Label Content="IP地址:" VerticalAlignment="Center" FontSize="14" Foreground="#444444" FontWeight="SemiBold" Padding="0,0,10,0"/>
+                        <TextBox Grid.Column="1" Margin="5,0,0,0" x:Name="ipTextBox" VerticalAlignment="Center" Height="36" FontSize="13" Style="{StaticResource ModernTextBox}"/>
+                    </Grid>
+
+                    <!-- 子网掩码 -->
+                    <Grid Grid.Row="2" Margin="0,0,0,15">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="90"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Label Content="子网掩码:" VerticalAlignment="Center" FontSize="14" Foreground="#444444" FontWeight="SemiBold" Padding="0,0,10,0"/>
+                        <TextBox Grid.Column="1" Margin="5,0,0,0" x:Name="maskTextBox" VerticalAlignment="Center" Height="36" FontSize="13" Style="{StaticResource ModernTextBox}"/>
+                    </Grid>
+
+                    <!-- 默认网关 -->
+                    <Grid Grid.Row="3" Margin="0,0,0,15">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="90"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Label Content="默认网关:" VerticalAlignment="Center" FontSize="14" Foreground="#444444" FontWeight="SemiBold" Padding="0,0,10,0"/>
+                        <TextBox Grid.Column="1" Margin="5,0,0,0" x:Name="gatewayTextBox" VerticalAlignment="Center" Height="36" FontSize="13" Style="{StaticResource ModernTextBox}"/>
+                    </Grid>
+
+                    <!-- DNS服务器 -->
+                    <Grid Grid.Row="4" Margin="0,0,0,15">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="80"/>
+                        </Grid.RowDefinitions>
+                        <Label Content="DNS服务器:" FontSize="14" Foreground="#444444" FontWeight="SemiBold" Padding="0,0,0,8"/>
+                        <TextBox Grid.Row="1" x:Name="dnsTextBox" FontSize="13" Style="{StaticResource ModernTextBox}" AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"/>
+                    </Grid>
+
+                    <!-- 提示信息 -->
+                    <Border Grid.Row="5" Background="#e8f4f8" CornerRadius="6" Padding="12" BorderThickness="1" BorderBrush="#d4e6f1">
+                        <TextBlock Text="💡 提示：每行输入一个DNS服务器地址，支持IPv4格式" FontSize="12" Foreground="#2c5aa0"/>
+                    </Border>
+                </Grid>
             </Border>
         </Grid>
 
         <!-- 按钮区域 -->
-        <Border Grid.Row="2" Background="White" BorderThickness="0,1,0,0" BorderBrush="#e0e0e0" Padding="12">
+        <Border Grid.Row="2" Background="White" BorderThickness="1,1,1,1" BorderBrush="#e0e0e0" Padding="20" CornerRadius="0,0,8,8">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-                <Button Content="✓ 确定" x:Name="okButton" Width="95" Height="34" Background="#3498db" Foreground="White" BorderThickness="0" FontSize="11" FontWeight="SemiBold" Margin="0,0,10,0" Style="{StaticResource ModernButton}"/>
-                <Button Content="✕ 取消" x:Name="cancelButton" Width="95" Height="34" Background="#95a5a6" Foreground="White" BorderThickness="0" FontSize="11" FontWeight="SemiBold" Style="{StaticResource ModernButton}"/>
+                <Button Content="✓ 确定" x:Name="okButton" Width="100" Height="40" Background="#3498db" Foreground="White" BorderThickness="0" FontSize="13" FontWeight="SemiBold" Margin="0,0,15,0" Style="{StaticResource ModernButton}"/>
+                <Button Content="✕ 取消" x:Name="cancelButton" Width="100" Height="40" Background="#95a5a6" Foreground="White" BorderThickness="0" FontSize="13" FontWeight="SemiBold" Style="{StaticResource ModernButton}"/>
             </StackPanel>
         </Border>
     </Grid>

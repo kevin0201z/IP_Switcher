@@ -8,46 +8,146 @@
         <Color x:Key="SuccessColor">#27ae60</Color>
         <Color x:Key="WarningColor">#f39c12</Color>
         <Color x:Key="DangerColor">#e74c3c</Color>
-        <Color x:Key="HeaderBgColor">#2c3e50</Color>
+        <Color x:Key="HeaderBgColor">#FF7B177B</Color>
         <Color x:Key="TextColor">#333333</Color>
         <Color x:Key="LightTextColor">#666666</Color>
-        <Color x:Key="BorderColor">#d0d0d0</Color>
+        <Color x:Key="BorderColor">#e0e0e0</Color>
         <Color x:Key="LightBgColor">#f8f9fa</Color>
+        <Color x:Key="CardBgColor">#ffffff</Color>
+        <Color x:Key="HoverColor">#f0f8ff</Color>
+        <Color x:Key="SelectedColor">#e3f2fd</Color>
+        
+        <!-- Effects -->
+        <DropShadowEffect x:Key="TextShadow" ShadowDepth="2" BlurRadius="4" Opacity="0.3" Color="#000000"/>
+        <DropShadowEffect x:Key="ButtonShadow" ShadowDepth="2" BlurRadius="6" Opacity="0.2" Color="#000000"/>
 
         <!-- Button Style -->
         <Style x:Key="ModernButton" TargetType="Button">
-            <Setter Property="Background" Value="#3498db"/>
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="FontSize" Value="14"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="Padding" Value="8,4,8,4"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="MinHeight" Value="32"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}" 
+                        <Border x:Name="border" 
                                 CornerRadius="6" 
                                 Padding="{TemplateBinding Padding}"
-                                x:Name="border">
+                                Background="{TemplateBinding Background}"
+                                Effect="{StaticResource ButtonShadow}">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="border" Property="Background" Value="#2980b9"/>
-                                <Setter Property="Effect">
+                            <!-- 默认按钮背景 -->
+                            <Trigger Property="Background" Value="#3498db">
+                                <Setter TargetName="border" Property="Background">
                                     <Setter.Value>
-                                        <DropShadowEffect ShadowDepth="2" BlurRadius="4" Opacity="0.3"/>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                            <GradientStop Color="#3498db" Offset="0"/>
+                                            <GradientStop Color="#2980b9" Offset="1"/>
+                                        </LinearGradientBrush>
                                     </Setter.Value>
                                 </Setter>
                             </Trigger>
+                            
+                            <!-- 成功按钮背景 -->
+                            <Trigger Property="Background" Value="#27ae60">
+                                <Setter TargetName="border" Property="Background">
+                                    <Setter.Value>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                            <GradientStop Color="#27ae60" Offset="0"/>
+                                            <GradientStop Color="#219150" Offset="1"/>
+                                        </LinearGradientBrush>
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+                            
+                            <!-- 警告按钮背景 -->
+                            <Trigger Property="Background" Value="#f39c12">
+                                <Setter TargetName="border" Property="Background">
+                                    <Setter.Value>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                            <GradientStop Color="#f39c12" Offset="0"/>
+                                            <GradientStop Color="#e67e22" Offset="1"/>
+                                        </LinearGradientBrush>
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+                            
+                            <!-- 危险按钮背景 -->
+                            <Trigger Property="Background" Value="#e74c3c">
+                                <Setter TargetName="border" Property="Background">
+                                    <Setter.Value>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                            <GradientStop Color="#e74c3c" Offset="0"/>
+                                            <GradientStop Color="#c0392b" Offset="1"/>
+                                        </LinearGradientBrush>
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+                            
+                            <!-- 次要按钮背景 -->
+                            <Trigger Property="Background" Value="#95a5a6">
+                                <Setter TargetName="border" Property="Background">
+                                    <Setter.Value>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                            <GradientStop Color="#95a5a6" Offset="0"/>
+                                            <GradientStop Color="#7f8c8d" Offset="1"/>
+                                        </LinearGradientBrush>
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+                            
+                            <!-- 鼠标悬停效果 -->
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Effect">
+                                    <Setter.Value>
+                                        <DropShadowEffect ShadowDepth="3" BlurRadius="8" Opacity="0.3"/>
+                                    </Setter.Value>
+                                </Setter>
+                                <Setter TargetName="border" Property="RenderTransform">
+                                    <Setter.Value>
+                                        <ScaleTransform ScaleX="1.02" ScaleY="1.02"/>
+                                    </Setter.Value>
+                                </Setter>
+                                <Setter Property="Foreground" Value="White"/>
+                            </Trigger>
+                            
+                            <!-- 按钮按下效果 -->
                             <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="border" Property="Background" Value="#1e5f8c"/>
+                                <Setter TargetName="border" Property="RenderTransform">
+                                    <Setter.Value>
+                                        <ScaleTransform ScaleX="0.98" ScaleY="0.98"/>
+                                    </Setter.Value>
+                                </Setter>
+                                <Setter TargetName="border" Property="Effect">
+                                    <Setter.Value>
+                                        <DropShadowEffect ShadowDepth="1" BlurRadius="4" Opacity="0.2"/>
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+                            
+                            <!-- 按钮禁用效果 -->
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="border" Property="Background" Value="#bdc3c7"/>
+                                <Setter TargetName="border" Property="Effect" Value="{x:Null}"/>
+                                <Setter TargetName="border" Property="RenderTransform" Value="{x:Null}"/>
+                                <Setter Property="Foreground" Value="#ecf0f1"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
+            <!-- 动画效果 -->
+            <Style.Resources>
+                <Storyboard x:Key="ButtonAnim">
+                    <DoubleAnimation Storyboard.TargetProperty="RenderTransform.ScaleX" Duration="0:0:0.1"/>
+                    <DoubleAnimation Storyboard.TargetProperty="RenderTransform.ScaleY" Duration="0:0:0.1"/>
+                </Storyboard>
+            </Style.Resources>
         </Style>
 
         <!-- TextBox Style -->
@@ -119,16 +219,22 @@
                                             ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}"
                                             Margin="10,8,10,8"
                                             VerticalAlignment="Center"/>
+                            <!-- 自定义ToggleButton，确保没有任何悬停效果 -->
                             <ToggleButton x:Name="toggleButton"
                                         Grid.Column="0"
                                         Grid.ColumnSpan="2"
                                         Focusable="false" 
                                         ClickMode="Press"
-                                        IsChecked="{Binding Path=IsDropDownOpen,Mode=TwoWay,RelativeSource={RelativeSource TemplatedParent}}"
-                                        Background="Transparent" 
-                                        BorderThickness="0"
-                                        Foreground="Transparent"
-                                        Cursor="Hand"/>
+                                        IsChecked="{Binding Path=IsDropDownOpen,Mode=TwoWay,RelativeSource={RelativeSource TemplatedParent}}">
+                                <ToggleButton.Template>
+                                    <ControlTemplate TargetType="ToggleButton">
+                                        <Grid Background="Transparent" Cursor="Hand">
+                                            <!-- 完全透明的ToggleButton，没有任何视觉效果 -->
+                                            <ContentPresenter HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+                                        </Grid>
+                                    </ControlTemplate>
+                                </ToggleButton.Template>
+                            </ToggleButton>
                             <TextBlock Grid.Column="1" 
                                      Text="▼" 
                                      Foreground="#666666"
@@ -159,7 +265,7 @@
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
                                 <Setter TargetName="border" Property="BorderBrush" Value="#3498db"/>
-                                <Setter TargetName="border" Property="Background" Value="#f0f8ff"/>
+                                <!-- 只有边框颜色变化，没有背景或覆盖层变化 -->
                             </Trigger>
                             <Trigger Property="IsFocused" Value="True">
                                 <Setter TargetName="border" Property="BorderBrush" Value="#3498db"/>

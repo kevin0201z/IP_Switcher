@@ -93,7 +93,7 @@ namespace IP_Switcher
         /// <param name="message">日志消息</param>
         private void WriteLog(LogLevel level, string message)
         {
-            if (level < LogLevel.Warning)
+            if (level < LogLevel.Info)
             {
                 return;
             }

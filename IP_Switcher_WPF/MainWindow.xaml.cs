@@ -1,11 +1,7 @@
-using System;
-using System.Collections.ObjectModel;
-using System.Linq;
 using System.Windows;
-using System.Windows.Controls;
+using System.Windows.Media.Animation;
 using IP_Switcher;
 using IP_Switcher.Interfaces;
-using IP_Switcher.Models;
 
 namespace IP_Switcher_WPF
 {
@@ -49,6 +45,18 @@ namespace IP_Switcher_WPF
             {
                 networkManagerImpl.ErrorOccurred += NetworkManager_ErrorOccurred;
             }
+        }
+        
+        /// <summary>
+        /// 窗口加载完成事件
+        /// </summary>
+        /// <param name="sender">发送者</param>
+        /// <param name="e">事件参数</param>
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            // 触发窗口淡入动画
+            var fadeInStoryboard = Resources["WindowFadeIn"] as Storyboard;
+            fadeInStoryboard?.Begin(this);
         }
 
         /// <summary>

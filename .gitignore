@@ -9,6 +9,7 @@ ehthumbs.db
 
 # IDE配置文件
 .vs/
+.trae/
 .idea/
 *.suo
 *.swp
