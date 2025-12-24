@@ -1,3 +1,4 @@
+using System;
 using System.Windows;
 using System.Windows.Media.Animation;
 using IP_Switcher;
@@ -10,9 +11,6 @@ namespace IP_Switcher_WPF
     /// </summary>
     public partial class MainWindow : Window
     {
-        // 常量定义
-        private const string DHCP_CONFIG_NAME = "DHCP自动获取";
-        
         private readonly ILogger _logger;
         private readonly INetworkManager _networkManager;
         private readonly IConfigManager _configManager;
@@ -41,10 +39,10 @@ namespace IP_Switcher_WPF
             DataContext = ViewModel;
             
             // 订阅错误事件
-            if (networkManager is NetworkManager networkManagerImpl)
-            {
-                networkManagerImpl.ErrorOccurred += NetworkManager_ErrorOccurred;
-            }
+            _networkManager.ErrorOccurred += NetworkManager_ErrorOccurred;
+            
+            // 订阅窗口关闭事件，用于清理资源
+            Closed += MainWindow_Closed;
         }
         
         /// <summary>
@@ -66,8 +64,25 @@ namespace IP_Switcher_WPF
         /// <param name="e">错误事件参数</param>
         private void NetworkManager_ErrorOccurred(object sender, NetworkErrorEventArgs e)
         {
+            // 记录错误日志
+            _logger.Error(e.ErrorMessage, e.Exception);
+            
             // 显示友好的错误提示
             MessageBox.Show($"操作失败: {e.ErrorMessage}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+        
+        /// <summary>
+        /// 窗口关闭事件处理，用于清理资源
+        /// </summary>
+        /// <param name="sender">发送者</param>
+        /// <param name="e">事件参数</param>
+        private void MainWindow_Closed(object sender, EventArgs e)
+        {
+            // 取消订阅错误事件，防止内存泄漏
+            _networkManager.ErrorOccurred -= NetworkManager_ErrorOccurred;
+            
+            // 取消订阅关闭事件
+            Closed -= MainWindow_Closed;
         }
     }
 }
