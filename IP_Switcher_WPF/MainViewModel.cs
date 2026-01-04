@@ -1,7 +1,9 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using IP_Switcher;
@@ -150,8 +152,8 @@ namespace IP_Switcher_WPF
             // 初始化命令
             InitializeCommands();
 
-            // 初始化应用程序
-            InitializeApp();
+            // 初始化应用程序 - 异步加载，避免阻塞UI线程
+            InitializeAppAsync();
         }
 
         /// <summary>
@@ -167,17 +169,16 @@ namespace IP_Switcher_WPF
         }
 
         /// <summary>
-        /// 初始化应用程序
+        /// 异步初始化应用程序
         /// </summary>
-        private void InitializeApp()
+        private async void InitializeAppAsync()
         {
             try
             {
                 _logger.Info("应用程序初始化开始");
 
-                // 加载初始数据
-                LoadNicList();
-                LoadConfigList();
+                // 异步加载初始数据
+                await LoadDataAsync();
 
                 _logger.Info("应用程序初始化完成");
             }
@@ -185,6 +186,113 @@ namespace IP_Switcher_WPF
             {
                 _logger.Error("初始化应用失败: " + ex.Message);
                 MessageBox.Show($"初始化应用失败: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        /// <summary>
+        /// 异步加载所有数据
+        /// </summary>
+        private async Task LoadDataAsync()
+        {
+            // 使用Task.Run在后台线程执行耗时操作
+            await Task.Run(() =>
+            {
+                // 加载配置列表（相对较快）
+                var configs = _configManager.LoadConfig();
+                
+                // 加载网卡列表（可能较慢，涉及WMI查询）
+                var nicList = _networkManager.GetAllNetworkAdapters();
+                
+                // 从配置文件读取上次选中的网卡
+                string lastNic = _configManager.GetLastNic();
+                
+                // 在UI线程更新ObservableCollection
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    // 先加载配置列表，让UI先显示
+                    LoadConfigListSync(configs);
+                    
+                    // 再加载网卡列表
+                    LoadNicListSync(nicList, lastNic);
+                });
+            });
+        }
+
+        /// <summary>
+        /// 同步加载配置列表（UI线程）
+        /// </summary>
+        private void LoadConfigListSync(List<NetworkConfig> savedConfigs)
+        {
+            Configs.Clear();
+            
+            // 添加DHCP配置项
+            Configs.Add(new NetworkConfig
+            {
+                Name = DHCP_CONFIG_NAME,
+                IPAddress = "",
+                SubnetMask = "",
+                DefaultGateway = "",
+                DnsServers = new System.Collections.Generic.List<string>()
+            });
+            
+            // 添加保存的配置
+            if (savedConfigs != null)
+            {
+                foreach (var config in savedConfigs)
+                {
+                    Configs.Add(config);
+                }
+            }
+            
+            _logger.Info($"成功加载 {Configs.Count} 个配置");
+        }
+
+        /// <summary>
+        /// 同步加载网卡列表（UI线程）
+        /// </summary>
+        private void LoadNicListSync(List<NicInfo> nicList, string lastNic)
+        {
+            NicList.Clear();
+            
+            // 添加网卡名称到下拉框
+            if (nicList != null)
+            {
+                foreach (var nic in nicList)
+                {
+                    NicList.Add(nic.Name);
+                }
+            }
+            
+            _logger.Info($"成功加载 {NicList.Count} 个网卡");
+            
+            if (NicList.Count > 0)
+            {
+                if (!string.IsNullOrEmpty(lastNic))
+                {
+                    // 查找上次选中的网卡并选中
+                    int index = NicList.IndexOf(lastNic);
+                    if (index != -1)
+                    {
+                        SelectedNic = lastNic;
+                        _logger.Info($"恢复上次选中的网卡: {lastNic}");
+                    }
+                    else
+                    {
+                        // 如果上次选中的网卡不存在，默认选中第一个
+                        SelectedNic = NicList[0];
+                        // 保存当前选中的网卡为默认网卡
+                        _configManager.SetLastNic(SelectedNic);
+                        _logger.Info($"上次选中的网卡 {lastNic} 不存在，默认选中第一个网卡");
+                    }
+                }
+                else
+                {
+                    // 没有上次选中的网卡，默认选中第一个
+                    SelectedNic = NicList[0];
+                    // 保存当前选中的网卡为默认网卡
+                    _configManager.SetLastNic(SelectedNic);
+                    _logger.Info("首次启动，默认选中第一个网卡");
+                }
             }
         }
 

@@ -12,17 +12,14 @@
         WindowStartupLocation="CenterScreen"
         ResizeMode="CanResize"
         Background="#f8f9fa"
-        Loaded="Window_Loaded">
+        Loaded="Window_Loaded"
+        AllowsTransparency="False" 
+        WindowStyle="SingleBorderWindow">
     <Window.Resources>
-        <!-- 窗口淡入动画 -->
+        <!-- 窗口淡入动画 - 优化：避免黑色背景闪烁 -->
         <Storyboard x:Key="WindowFadeIn">
-            <DoubleAnimation Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.5"/>
-        </Storyboard>
-        
-        <!-- 控件淡入动画 -->
-        <Storyboard x:Key="ControlFadeIn">
-            <DoubleAnimation Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.3"/>
-            <DoubleAnimation Storyboard.TargetProperty="RenderTransform.Y" From="10" To="0" Duration="0:0:0.3"/>
+            <!-- 使用更柔和的透明度过渡，并确保背景色先加载 -->
+            <DoubleAnimation Storyboard.TargetProperty="Opacity" From="0.3" To="1" Duration="0:0:0.3"/>
         </Storyboard>
     </Window.Resources>
     <Grid>
@@ -43,9 +40,6 @@
                     <GradientStop Color="#FF9B479B" Offset="1"/>
                 </LinearGradientBrush>
             </Border.Background>
-            <Border.Effect>
-                <DropShadowEffect ShadowDepth="4" BlurRadius="10" Opacity="0.2"/>
-            </Border.Effect>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
                 <!-- 应用图标 -->
                 <Viewbox Width="32" Height="32">
@@ -83,7 +77,7 @@
                     <ComboBox Grid.Column="1" Margin="5,0,20,0" ItemsSource="{Binding NicList}" SelectedItem="{Binding SelectedNic}" VerticalAlignment="Center" Height="36" FontSize="13" Style="{StaticResource ModernComboBox}"/>
 
                     <!-- 当前配置显示框 -->
-                    <Border Grid.Column="2" Margin="0,0,0,0" Background="#f8f9fa" CornerRadius="8" Padding="15" HorizontalAlignment="Stretch" Height="135" BorderThickness="1" BorderBrush="#e0e0e0">
+                    <Border Grid.Column="2" Margin="0,0,0,0" Background="#f8f9fa" CornerRadius="8" Padding="15" HorizontalAlignment="Stretch" Height="132" BorderThickness="1" BorderBrush="#e0e0e0">
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto"/>
@@ -113,9 +107,9 @@
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                         <TextBlock Text="网络配置:" FontSize="14" FontWeight="SemiBold" Foreground="#444444" VerticalAlignment="Center"/>
                         <StackPanel Orientation="Horizontal" Margin="20,0,0,0">
-                            <Button Content="➕ 添加" x:Name="addButton" Width="80" Height="36" Background="#3498db" Foreground="White" BorderThickness="0" FontSize="12" FontWeight="SemiBold" Margin="0,0,10,0" Style="{StaticResource ModernButton}" Command="{Binding AddConfigCommand}"/>
-                            <Button Content="✏️ 编辑" x:Name="editButton" Width="80" Height="36" Background="#f39c12" Foreground="White" BorderThickness="0" FontSize="12" FontWeight="SemiBold" Margin="0,0,10,0" Style="{StaticResource ModernButton}" Command="{Binding EditConfigCommand}"/>
-                            <Button Content="🗑️ 删除" x:Name="deleteButton" Width="80" Height="36" Background="#e74c3c" Foreground="White" BorderThickness="0" FontSize="12" FontWeight="SemiBold" Style="{StaticResource ModernButton}" Command="{Binding DeleteConfigCommand}"/>
+                            <Button Content="➕ 添加" x:Name="addButton" Width="80" Height="36" Background="#3498db" Foreground="White" BorderThickness="0" FontSize="13" FontWeight="SemiBold" Margin="0,0,10,0" Style="{StaticResource ModernButton}" Command="{Binding AddConfigCommand}"/>
+                            <Button Content="✏️ 编辑" x:Name="editButton" Width="80" Height="36" Background="#f39c12" Foreground="White" BorderThickness="0" FontSize="13" FontWeight="SemiBold" Margin="0,0,10,0" Style="{StaticResource ModernButton}" Command="{Binding EditConfigCommand}"/>
+                            <Button Content="🗑️ 删除" x:Name="deleteButton" Width="80" Height="36" Background="#e74c3c" Foreground="White" BorderThickness="0" FontSize="13" FontWeight="SemiBold" Style="{StaticResource ModernButton}" Command="{Binding DeleteConfigCommand}"/>
                         </StackPanel>
                     </StackPanel>
                 </Border>

@@ -188,8 +188,8 @@ namespace IP_Switcher
             if (config == null)
                 return false;
             
-            // 如果是DHCP配置，无需验证IP地址等参数
-            if (string.IsNullOrEmpty(config.IPAddress) || string.IsNullOrEmpty(config.SubnetMask))
+            // 如果是DHCP配置（IP 和 子网掩码都为空），无需验证IP地址等参数
+            if (string.IsNullOrEmpty(config.IPAddress) && string.IsNullOrEmpty(config.SubnetMask))
                 return true;
             
             // 验证IP地址格式
@@ -233,6 +233,15 @@ namespace IP_Switcher
                     OnErrorOccurred("设置IP配置需要管理员权限");
                     return false;
                 }
+
+                // 验证网卡名称是否存在，防止命令注入和误操作
+                var nic = NetworkInterface.GetAllNetworkInterfaces()
+                    .FirstOrDefault(n => n.Name == nicName);
+                if (nic == null)
+                {
+                    OnErrorOccurred($"未找到网卡：{nicName}");
+                    return false;
+                }
                 
                 if (string.IsNullOrEmpty(config.IPAddress) || string.IsNullOrEmpty(config.SubnetMask))
                 {
@@ -250,34 +259,45 @@ namespace IP_Switcher
                     
                     // 设置为静态IP
                     // 构建设置IP地址的命令，根据是否有网关条件性添加
-                    string setAddressCommand = $"netsh interface ip set address name=\"{nicName}\" source=static addr={config.IPAddress} mask={config.SubnetMask}";
+                    string setAddressCommand = $"netsh interface ipv4 set address name=\"{nicName}\" source=static addr={config.IPAddress} mask={config.SubnetMask}";
                     if (!string.IsNullOrEmpty(config.DefaultGateway))
                     {
                         setAddressCommand += $" gateway={config.DefaultGateway} gwmetric=1";
                     }
-                    ExecuteCommand(setAddressCommand);
+                    var addrResult = ExecuteCommand(setAddressCommand);
+                    if (addrResult.exitCode != 0)
+                    {
+                        OnErrorOccurred($"设置静态IP失败: {addrResult.error}");
+                        return false;
+                    }
                     
                     // 设置DNS服务器
-                    // 始终清空现有DNS配置
-                    ExecuteCommand($"netsh interface ip set dns name=\"{nicName}\" source=static addr=none");
-                    
+                    // 始终清空现有DNS配置（尝试使用 ipv4 命令集）
+                    ExecuteCommand($"netsh interface ipv4 delete dns name=\"{nicName}\" addr=all");
+
                     if (config.DnsServers != null && config.DnsServers.Count > 0)
                     {
                         // 添加主DNS
-                        ExecuteCommand($"netsh interface ip add dns name=\"{nicName}\" addr={config.DnsServers[0]} index=1");
-                        
+                        var dnsResult = ExecuteCommand($"netsh interface ipv4 add dns name=\"{nicName}\" addr={config.DnsServers[0]} index=1");
+                        if (dnsResult.exitCode != 0)
+                        {
+                            OnErrorOccurred($"设置主DNS失败: {dnsResult.error}");
+                            // 继续尝试但记录错误
+                        }
+
                         // 添加备用DNS（如果有）
                         for (int i = 1; i < config.DnsServers.Count; i++)
                         {
-                            ExecuteCommand($"netsh interface ip add dns name=\"{nicName}\" addr={config.DnsServers[i]} index={i + 1}");
+                            ExecuteCommand($"netsh interface ipv4 add dns name=\"{nicName}\" addr={config.DnsServers[i]} index={i + 1}");
                         }
                     }
                     
                     // 验证配置是否成功
                     NetworkConfig currentConfig = GetCurrentIpConfig(nicName);
-                    if (currentConfig.IPAddress == config.IPAddress && 
-                        currentConfig.SubnetMask == config.SubnetMask && 
-                        currentConfig.DefaultGateway == config.DefaultGateway)
+                    if (currentConfig != null &&
+                        string.Equals(currentConfig.IPAddress?.Trim(), config.IPAddress?.Trim(), StringComparison.OrdinalIgnoreCase) &&
+                        string.Equals(currentConfig.SubnetMask?.Trim(), config.SubnetMask?.Trim(), StringComparison.OrdinalIgnoreCase) &&
+                        string.Equals(currentConfig.DefaultGateway?.Trim(), config.DefaultGateway?.Trim(), StringComparison.OrdinalIgnoreCase))
                     {
                         return true;
                     }
@@ -310,12 +330,20 @@ namespace IP_Switcher
                     OnErrorOccurred("设置DHCP配置需要管理员权限");
                     return false;
                 }
+                // 验证网卡名称是否存在
+                var nic = NetworkInterface.GetAllNetworkInterfaces()
+                    .FirstOrDefault(n => n.Name == nicName);
+                if (nic == null)
+                {
+                    OnErrorOccurred($"未找到网卡：{nicName}");
+                    return false;
+                }
                 
                 // 设置IP地址为DHCP自动获取
-                ExecuteCommand($"netsh interface ip set address name=\"{nicName}\" source=dhcp");
+                ExecuteCommand($"netsh interface ipv4 set address name=\"{nicName}\" source=dhcp");
                 
                 // 设置DNS为DHCP自动获取
-                ExecuteCommand($"netsh interface ip set dns name=\"{nicName}\" source=dhcp");
+                ExecuteCommand($"netsh interface ipv4 set dns name=\"{nicName}\" source=dhcp");
                 
                 // DHCP配置后需要时间从服务器获取IP，添加延迟后重试验证
                 const int MAX_RETRIES = 10; // 最多重试10次
@@ -353,7 +381,7 @@ namespace IP_Switcher
         /// </summary>
         /// <param name="command">命令</param>
         /// <returns>命令执行结果</returns>
-        private string ExecuteCommand(string command)
+        private (string output, int exitCode, string error) ExecuteCommand(string command)
         {
             using (System.Diagnostics.Process process = new System.Diagnostics.Process())
             {
@@ -368,13 +396,14 @@ namespace IP_Switcher
                 string output = process.StandardOutput.ReadToEnd();
                 string error = process.StandardError.ReadToEnd();
                 process.WaitForExit();
+                int exitCode = process.ExitCode;
                 
                 if (!string.IsNullOrEmpty(error))
                 {
                     Console.WriteLine($"命令执行错误: {error}");
                 }
                 
-                return output;
+                return (output, exitCode, error);
             }
         }
     }
