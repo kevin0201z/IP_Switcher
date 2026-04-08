@@ -34,7 +34,7 @@ namespace IP_Switcher_WPF.ViewModels
             {
                 if (SetProperty(ref _selectedNicItem, value) && value != null)
                 {
-                    OnNicSelectedAsync();
+                    _ = OnNicSelectedAsync();
                 }
             }
         }
