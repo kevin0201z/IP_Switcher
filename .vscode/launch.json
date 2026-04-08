@@ -2,14 +2,40 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": ".NET Framework Launch",
+      "name": "WPF - IP Switcher",
+      "type": "clr",
+      "request": "launch",
+      "program": "${workspaceFolder}/IP_Switcher_WPF/bin/Debug/IP_Switcher_WPF.exe",
+      "cwd": "${workspaceFolder}/IP_Switcher_WPF",
+      "stopAtEntry": false,
+      "console": "internalConsole",
+      "preLaunchTask": "build-wpf"
+    },
+    {
+      "name": "Console - IP Switcher",
       "type": "clr",
       "request": "launch",
       "program": "${workspaceFolder}/IP_Switcher/bin/Debug/IP_Switcher.exe",
       "cwd": "${workspaceFolder}/IP_Switcher",
       "stopAtEntry": false,
-      "console": "externalTerminal",
-      "preLaunchTask": "build"
+      "console": "internalConsole",
+      "preLaunchTask": "build-console"
+    },
+    {
+      "name": "WinForms - IP Switcher",
+      "type": "clr",
+      "request": "launch",
+      "program": "${workspaceFolder}/IP_Switcher_GUI/bin/Debug/IP_Switcher_GUI.exe",
+      "cwd": "${workspaceFolder}/IP_Switcher_GUI",
+      "stopAtEntry": false,
+      "console": "internalConsole",
+      "preLaunchTask": "build-gui"
+    },
+    {
+      "name": "Attach to Process",
+      "type": "clr",
+      "request": "attach",
+      "processId": "${command:pickProcess}"
     }
   ]
 }

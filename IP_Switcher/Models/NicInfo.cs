@@ -31,13 +31,14 @@ namespace IP_Switcher.Models
         {
             Name = networkInterface.Name;
             InterfaceType = networkInterface.NetworkInterfaceType;
-            Type = GetFriendlyTypeName(InterfaceType);
+            //Type = GetFriendlyTypeName(InterfaceType);
+            Type = GetInterfaceCategory(networkInterface);
             Status = networkInterface.OperationalStatus;
             Description = networkInterface.Description;
             MacAddress = networkInterface.GetPhysicalAddress().ToString();
-            
+
             var ipProps = networkInterface.GetIPProperties();
-            var unicast = ipProps.UnicastAddresses.FirstOrDefault(a => 
+            var unicast = ipProps.UnicastAddresses.FirstOrDefault(a =>
                 a.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork);
             IPAddress = unicast?.Address?.ToString() ?? "";
         }
@@ -46,7 +47,7 @@ namespace IP_Switcher.Models
         {
             // 处理未定义的枚举值（如 53）
             int typeValue = (int)type;
-            
+
             // 首先检查是否为已知的 IANA ifType 值
             switch (typeValue)
             {
@@ -80,7 +81,7 @@ namespace IP_Switcher.Models
                 case 243: return "移动宽带(GSM)";
                 case 244: return "移动宽带(CDMA)";
             }
-            
+
             // 回退到枚举名称
             switch (type)
             {
@@ -111,6 +112,51 @@ namespace IP_Switcher.Models
                 default:
                     return $"网络适配器({typeValue})";
             }
+        }
+        public string GetInterfaceCategory(NetworkInterface ni)
+        {
+            int rawType = (int)ni.NetworkInterfaceType;
+            string name = ni.Name.ToLower();
+            string desc = ni.Description.ToLower();
+
+            // 1. TAP / TUN / OpenVPN
+            if (rawType == 53 ||
+                name.Contains("tap") ||
+                desc.Contains("tap") ||
+                desc.Contains("vpn"))
+            {
+                return "TAP / VPN 虚拟网卡";
+            }
+
+            // 2. Hyper-V
+            if (name.Contains("hyper-v") || desc.Contains("hyper-v"))
+                return "Hyper-V 虚拟网卡";
+
+            // 3. VMware
+            if (name.Contains("vmware") || desc.Contains("vmware"))
+                return "VMware 虚拟网卡";
+
+            // 4. WSL
+            if (name.Contains("wsl") || desc.Contains("wsl"))
+                return "WSL 虚拟网卡";
+
+            // 5. VirtualBox
+            if (name.Contains("virtualbox") || desc.Contains("virtualbox"))
+                return "VirtualBox 虚拟网卡";
+
+            // 6. Microsoft Bridge / Virtual Switch
+            if (desc.Contains("virtual") || desc.Contains("switch") || desc.Contains("bridge"))
+                return "Windows 虚拟交换机 / 桥接网卡";
+
+            // 7. 真实网卡（Ethernet / WiFi）
+            if (ni.NetworkInterfaceType == NetworkInterfaceType.Ethernet ||
+                ni.NetworkInterfaceType == NetworkInterfaceType.Wireless80211)
+            {
+                return "物理网卡";
+            }
+
+            // 8. 其他未知类型
+            return $"未知类型（原始值: {rawType}）";
         }
     }
 }

@@ -314,10 +314,10 @@ namespace IP_Switcher
                     {
                         setAddressCommand += $" gateway={safeGateway} gwmetric=1";
                     }
-                    var addrResult = await ExecuteCommandAsync(setAddressCommand);
-                    if (addrResult.exitCode != 0)
+                    var (output, exitCode, error) = await ExecuteCommandAsync(setAddressCommand);
+                    if (exitCode != 0)
                     {
-                        OnErrorOccurred($"设置静态IP失败: {addrResult.error}");
+                        OnErrorOccurred($"设置静态IP失败: {error}");
                         return false;
                     }
 

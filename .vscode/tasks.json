@@ -2,12 +2,12 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "build",
+      "label": "build-wpf",
       "command": "dotnet",
       "type": "process",
       "args": [
         "build",
-        "${workspaceFolder}/IP_Switcher/IP_Switcher.csproj",
+        "${workspaceFolder}/IP_Switcher_WPF/IP_Switcher_WPF.csproj",
         "/property:GenerateFullPaths=true",
         "/consoleloggerparameters:NoSummary"
       ],
@@ -21,11 +21,11 @@
       "problemMatcher": "$msCompile"
     },
     {
-      "label": "clean",
+      "label": "build-console",
       "command": "dotnet",
       "type": "process",
       "args": [
-        "clean",
+        "build",
         "${workspaceFolder}/IP_Switcher/IP_Switcher.csproj",
         "/property:GenerateFullPaths=true",
         "/consoleloggerparameters:NoSummary"
@@ -37,24 +37,49 @@
       "problemMatcher": "$msCompile"
     },
     {
-      "label": "rebuild",
+      "label": "build-gui",
       "command": "dotnet",
       "type": "process",
       "args": [
         "build",
-        "${workspaceFolder}/IP_Switcher/IP_Switcher.csproj",
+        "${workspaceFolder}/IP_Switcher_GUI/IP_Switcher_GUI.csproj",
         "/property:GenerateFullPaths=true",
-        "/consoleloggerparameters:NoSummary",
-        "/t:Rebuild"
+        "/consoleloggerparameters:NoSummary"
       ],
-      "group": {
-        "kind": "build",
-        "isDefault": true
-      },
+      "group": "build",
       "presentation": {
         "reveal": "silent"
       },
       "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "build-all",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "build",
+        "${workspaceFolder}/IP_Switcher.sln",
+        "/property:GenerateFullPaths=true",
+        "/consoleloggerparameters:NoSummary"
+      ],
+      "group": "build",
+      "presentation": {
+        "reveal": "silent"
+      },
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "clean",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "clean",
+        "${workspaceFolder}/IP_Switcher.sln"
+      ],
+      "group": "build",
+      "presentation": {
+        "reveal": "silent"
+      }
     }
   ]
 }

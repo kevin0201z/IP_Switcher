@@ -81,22 +81,40 @@
                               Height="48" 
                               FontSize="13" 
                               Style="{StaticResource ModernComboBox}">
-                        <ComboBox.ItemTemplate>
-                            <DataTemplate>
-                                <Grid Margin="0,2">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto"/>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="Auto"/>
-                                    </Grid.ColumnDefinitions>
-                                    <TextBlock Grid.Column="0" Text="{Binding TypeIcon}" FontSize="14" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                                    <StackPanel Grid.Column="1" Orientation="Vertical" VerticalAlignment="Center">
-                                        <TextBlock Text="{Binding Name}" FontSize="13" FontWeight="SemiBold" Foreground="#333333"/>
-                                        <TextBlock Text="{Binding DisplayInfo}" FontSize="10" Foreground="#888888" Margin="0,1,0,0"/>
+                        <ComboBox.Resources>
+                            <DataTemplate x:Key="NicDisplayTemplate">
+                                <DockPanel Margin="0,3" LastChildFill="True">
+                                    <Border DockPanel.Dock="Right"
+                                            MinWidth="96"
+                                            Margin="12,0,0,0"
+                                            Padding="10,3"
+                                            VerticalAlignment="Center"
+                                            Background="#F4F8FC"
+                                            BorderBrush="#D7E4F2"
+                                            BorderThickness="1"
+                                            CornerRadius="6">
+                                        <TextBlock Text="{Binding IPAddress}"
+                                                   FontSize="11"
+                                                   FontWeight="SemiBold"
+                                                   Foreground="#4F6B85"
+                                                   HorizontalAlignment="Right"
+                                                   TextAlignment="Right"
+                                                   TextTrimming="CharacterEllipsis"/>
+                                    </Border>
+                                    <StackPanel Orientation="Vertical" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding Name}" FontSize="13" FontWeight="SemiBold" Foreground="#2E3338" TextTrimming="CharacterEllipsis"/>
+                                        <TextBlock Text="{Binding DisplayInfo}" FontSize="10" Foreground="#8A919A" Margin="0,1,0,0" TextTrimming="CharacterEllipsis"/>
                                     </StackPanel>
-                                    <TextBlock Grid.Column="2" Text="{Binding IPAddress}" FontSize="11" Foreground="#666666" VerticalAlignment="Center" Margin="10,0,0,0"/>
-                                </Grid>
+                                </DockPanel>
                             </DataTemplate>
+                        </ComboBox.Resources>
+                        <ComboBox.ItemContainerStyle>
+                            <Style TargetType="ComboBoxItem">
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                            </Style>
+                        </ComboBox.ItemContainerStyle>
+                        <ComboBox.ItemTemplate>
+                            <StaticResource ResourceKey="NicDisplayTemplate"/>
                         </ComboBox.ItemTemplate>
                     </ComboBox>
 

@@ -217,8 +217,8 @@
                             </Border>
                             <ContentPresenter x:Name="contentPresenter"
                                             Grid.Column="0"
-                                            Content="{TemplateBinding SelectionBoxItem}" 
-                                            ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}" 
+                                            Content="{TemplateBinding SelectedItem}" 
+                                            ContentTemplate="{TemplateBinding ItemTemplate}" 
                                             ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}"
                                             Margin="10,8,10,8"
                                             VerticalAlignment="Center"/>
@@ -258,7 +258,7 @@
                                         BorderThickness="1" 
                                         CornerRadius="4"
                                         Padding="0">
-                                    <ScrollViewer x:Name="DropDownScrollViewer" MaxHeight="200">
+                                    <ScrollViewer x:Name="DropDownScrollViewer" MaxHeight="212">
                                         <ItemsPresenter KeyboardNavigation.DirectionalNavigation="Contained" 
                                                       SnapsToDevicePixels="True"/>
                                     </ScrollViewer>

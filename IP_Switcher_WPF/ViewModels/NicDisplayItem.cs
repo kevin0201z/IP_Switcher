@@ -39,7 +39,7 @@ namespace IP_Switcher_WPF.ViewModels
             Description = nicInfo.Description;
             MacAddress = nicInfo.MacAddress;
 
-            SetIconAndColor();
+            //SetIconAndColor();
         }
 
         private void SetIconAndColor()
