@@ -12,7 +12,16 @@ namespace IP_Switcher
     /// </summary>
     public class ConfigManager : IConfigManager
     {
-        private readonly string defaultConfigPath = "config.json";
+        private readonly string defaultConfigPath;
+
+        /// <summary>
+        /// 构造函数
+        /// </summary>
+        public ConfigManager()
+        {
+            string appDirectory = AppDomain.CurrentDomain.BaseDirectory;
+            defaultConfigPath = Path.Combine(appDirectory, "config.json");
+        }
         
         /// <summary>
         /// 加载默认配置文件
@@ -71,9 +80,9 @@ namespace IP_Switcher
                     return string.IsNullOrWhiteSpace(root?.LastNic) ? null : root.LastNic;
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // 忽略，返回 null
+                Console.WriteLine($"读取LastNic失败: {ex.Message}");
             }
             return null;
         }
@@ -97,9 +106,9 @@ namespace IP_Switcher
                 string updatedJson = JsonSerializer.Serialize(root, new JsonSerializerOptions { WriteIndented = true });
                 File.WriteAllText(defaultConfigPath, updatedJson);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // 忽略写入失败
+                Console.WriteLine($"保存LastNic失败: {ex.Message}");
             }
         }
 
@@ -179,9 +188,9 @@ namespace IP_Switcher
                             root.LastNic = existing.LastNic;
                         }
                     }
-                    catch
+                    catch (Exception ex)
                     {
-                        // 忽略读取错误，继续保存新的根对象
+                        Console.WriteLine($"读取现有配置文件失败，将使用新配置: {ex.Message}");
                     }
                 }
                 
@@ -221,29 +230,6 @@ namespace IP_Switcher
         {
             Configurations = new List<NetworkConfig>();
             LastNic = null;
-        }
-    }
-
-    /// <summary>
-    /// 网络配置数据契约
-    /// </summary>
-    public class NetworkConfigDataContract
-    {
-        public string Name { get; set; }
-        
-        public string NicName { get; set; }
-        
-        public string IPAddress { get; set; }
-        
-        public string SubnetMask { get; set; }
-        
-        public string DefaultGateway { get; set; }
-        
-        public List<string> DnsServers { get; set; }
-        
-        public NetworkConfigDataContract()
-        {
-            DnsServers = new List<string>();
         }
     }
 }

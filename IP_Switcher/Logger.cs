@@ -87,13 +87,18 @@ namespace IP_Switcher
         }
 
         /// <summary>
+        /// 最小日志级别（默认为Info，只记录Info及以上级别）
+        /// </summary>
+        private LogLevel minLogLevel = LogLevel.Info;
+
+        /// <summary>
         /// 写入日志
         /// </summary>
         /// <param name="level">日志级别</param>
         /// <param name="message">日志消息</param>
         private void WriteLog(LogLevel level, string message)
         {
-            if (level < LogLevel.Error)
+            if (level < minLogLevel)
             {
                 return;
             }

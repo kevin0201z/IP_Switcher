@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.NetworkInformation;
+using System.Threading.Tasks;
 using IP_Switcher.Models;
 
 namespace IP_Switcher
@@ -179,6 +180,27 @@ namespace IP_Switcher
         }
 
         /// <summary>
+        /// 安全转义命令行参数，防止命令注入
+        /// 仅允许字母、数字、点号、连字符和下划线
+        /// </summary>
+        /// <param name="argument">要转义的参数</param>
+        /// <returns>转义后的安全参数，如果包含非法字符则返回null</returns>
+        private string EscapeCommandLineArgument(string argument)
+        {
+            if (string.IsNullOrEmpty(argument))
+                return argument;
+
+            foreach (char c in argument)
+            {
+                if (!char.IsLetterOrDigit(c) && c != '.' && c != '-' && c != '_')
+                {
+                    return null;
+                }
+            }
+            return argument;
+        }
+
+        /// <summary>
         /// 验证网络配置是否有效
         /// </summary>
         /// <param name="config">网络配置</param>
@@ -225,6 +247,17 @@ namespace IP_Switcher
         /// <returns>是否设置成功</returns>
         public bool SetIpConfig(string nicName, NetworkConfig config)
         {
+            return SetIpConfigAsync(nicName, config).GetAwaiter().GetResult();
+        }
+
+        /// <summary>
+        /// 异步设置网卡IP配置
+        /// </summary>
+        /// <param name="nicName">网卡名称</param>
+        /// <param name="config">网络配置</param>
+        /// <returns>是否设置成功</returns>
+        public async Task<bool> SetIpConfigAsync(string nicName, NetworkConfig config)
+        {
             try
             {
                 // 检查是否以管理员权限运行
@@ -246,7 +279,7 @@ namespace IP_Switcher
                 if (string.IsNullOrEmpty(config.IPAddress) || string.IsNullOrEmpty(config.SubnetMask))
                 {
                     // 设置为DHCP自动获取
-                    return SetDhcpConfig(nicName);
+                    return await SetDhcpConfigAsync(nicName);
                 }
                 else
                 {
@@ -256,39 +289,65 @@ namespace IP_Switcher
                         Console.WriteLine("无效的网络配置格式");
                         return false;
                     }
-                    
+
+                    // 安全转义所有参数，防止命令注入
+                    string safeIpAddress = EscapeCommandLineArgument(config.IPAddress);
+                    string safeSubnetMask = EscapeCommandLineArgument(config.SubnetMask);
+                    string safeGateway = EscapeCommandLineArgument(config.DefaultGateway);
+
+                    if (safeIpAddress == null || safeSubnetMask == null)
+                    {
+                        OnErrorOccurred("IP地址或子网掩码包含非法字符");
+                        return false;
+                    }
+
+                    if (!string.IsNullOrEmpty(config.DefaultGateway) && safeGateway == null)
+                    {
+                        OnErrorOccurred("默认网关包含非法字符");
+                        return false;
+                    }
+
                     // 设置为静态IP
                     // 构建设置IP地址的命令，根据是否有网关条件性添加
-                    string setAddressCommand = $"netsh interface ipv4 set address name=\"{nicName}\" source=static addr={config.IPAddress} mask={config.SubnetMask}";
-                    if (!string.IsNullOrEmpty(config.DefaultGateway))
+                    string setAddressCommand = $"netsh interface ipv4 set address name=\"{nicName}\" source=static addr={safeIpAddress} mask={safeSubnetMask}";
+                    if (!string.IsNullOrEmpty(safeGateway))
                     {
-                        setAddressCommand += $" gateway={config.DefaultGateway} gwmetric=1";
+                        setAddressCommand += $" gateway={safeGateway} gwmetric=1";
                     }
-                    var addrResult = ExecuteCommand(setAddressCommand);
+                    var addrResult = await ExecuteCommandAsync(setAddressCommand);
                     if (addrResult.exitCode != 0)
                     {
                         OnErrorOccurred($"设置静态IP失败: {addrResult.error}");
                         return false;
                     }
-                    
+
                     // 设置DNS服务器
                     // 始终清空现有DNS配置（尝试使用 ipv4 命令集）
-                    ExecuteCommand($"netsh interface ipv4 delete dns name=\"{nicName}\" addr=all");
+                    await ExecuteCommandAsync($"netsh interface ipv4 delete dns name=\"{nicName}\" addr=all");
 
                     if (config.DnsServers != null && config.DnsServers.Count > 0)
                     {
                         // 添加主DNS
-                        var dnsResult = ExecuteCommand($"netsh interface ipv4 add dns name=\"{nicName}\" addr={config.DnsServers[0]} index=1");
+                        string safeDns = EscapeCommandLineArgument(config.DnsServers[0]);
+                        if (safeDns == null)
+                        {
+                            OnErrorOccurred($"DNS服务器包含非法字符: {config.DnsServers[0]}");
+                            return false;
+                        }
+                        var dnsResult = await ExecuteCommandAsync($"netsh interface ipv4 add dns name=\"{nicName}\" addr={safeDns} index=1");
                         if (dnsResult.exitCode != 0)
                         {
                             OnErrorOccurred($"设置主DNS失败: {dnsResult.error}");
-                            // 继续尝试但记录错误
                         }
 
                         // 添加备用DNS（如果有）
                         for (int i = 1; i < config.DnsServers.Count; i++)
                         {
-                            ExecuteCommand($"netsh interface ipv4 add dns name=\"{nicName}\" addr={config.DnsServers[i]} index={i + 1}");
+                            safeDns = EscapeCommandLineArgument(config.DnsServers[i]);
+                            if (safeDns != null)
+                            {
+                                await ExecuteCommandAsync($"netsh interface ipv4 add dns name=\"{nicName}\" addr={safeDns} index={i + 1}");
+                            }
                         }
                     }
                     
@@ -322,6 +381,16 @@ namespace IP_Switcher
         /// <returns>是否设置成功</returns>
         public bool SetDhcpConfig(string nicName)
         {
+            return SetDhcpConfigAsync(nicName).GetAwaiter().GetResult();
+        }
+
+        /// <summary>
+        /// 异步设置网卡为DHCP自动获取IP
+        /// </summary>
+        /// <param name="nicName">网卡名称</param>
+        /// <returns>是否设置成功</returns>
+        public async Task<bool> SetDhcpConfigAsync(string nicName)
+        {
             try
             {
                 // 检查是否以管理员权限运行
@@ -340,10 +409,10 @@ namespace IP_Switcher
                 }
                 
                 // 设置IP地址为DHCP自动获取
-                ExecuteCommand($"netsh interface ipv4 set address name=\"{nicName}\" source=dhcp");
+                await ExecuteCommandAsync($"netsh interface ipv4 set address name=\"{nicName}\" source=dhcp");
                 
                 // 设置DNS为DHCP自动获取
-                ExecuteCommand($"netsh interface ipv4 set dns name=\"{nicName}\" source=dhcp");
+                await ExecuteCommandAsync($"netsh interface ipv4 set dns name=\"{nicName}\" source=dhcp");
                 
                 // DHCP配置后需要时间从服务器获取IP，添加延迟后重试验证
                 const int MAX_RETRIES = 10; // 最多重试10次
@@ -354,7 +423,7 @@ namespace IP_Switcher
                 {
                     // 计算当前重试的延迟时间（指数退避策略）
                     int delayMs = Math.Min(INITIAL_DELAY_MS * (int)Math.Pow(2, i), MAX_DELAY_MS);
-                    System.Threading.Thread.Sleep(delayMs);
+                    await Task.Delay(delayMs);
                     
                     NetworkConfig currentConfig = GetCurrentIpConfig(nicName);
                     if (!string.IsNullOrEmpty(currentConfig.IPAddress))
@@ -383,6 +452,16 @@ namespace IP_Switcher
         /// <returns>命令执行结果</returns>
         private (string output, int exitCode, string error) ExecuteCommand(string command)
         {
+            return ExecuteCommandAsync(command).GetAwaiter().GetResult();
+        }
+
+        /// <summary>
+        /// 异步执行命令行命令
+        /// </summary>
+        /// <param name="command">命令</param>
+        /// <returns>命令执行结果</returns>
+        private async Task<(string output, int exitCode, string error)> ExecuteCommandAsync(string command)
+        {
             using (System.Diagnostics.Process process = new System.Diagnostics.Process())
             {
                 process.StartInfo.FileName = "cmd.exe";
@@ -393,9 +472,14 @@ namespace IP_Switcher
                 process.StartInfo.CreateNoWindow = true;
                 
                 process.Start();
-                string output = process.StandardOutput.ReadToEnd();
-                string error = process.StandardError.ReadToEnd();
-                process.WaitForExit();
+                
+                var outputTask = process.StandardOutput.ReadToEndAsync();
+                var errorTask = process.StandardError.ReadToEndAsync();
+                
+                await Task.WhenAll(outputTask, errorTask, Task.Run(() => process.WaitForExit()));
+                
+                string output = outputTask.Result;
+                string error = errorTask.Result;
                 int exitCode = process.ExitCode;
                 
                 if (!string.IsNullOrEmpty(error))

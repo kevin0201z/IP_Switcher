@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using IP_Switcher.Models;
 using IP_Switcher.Interfaces;
@@ -78,7 +79,9 @@ namespace IP_Switcher.Tests
         public NicInfo GetNetworkAdapterByName(string nicName) => new NicInfo { Name = nicName };
         public NetworkConfig GetCurrentIpConfig(string nicName) => CurrentConfig;
         public bool SetIpConfig(string nicName, NetworkConfig config) { SetCalled = true; return true; }
+        public Task<bool> SetIpConfigAsync(string nicName, NetworkConfig config) { SetCalled = true; return Task.FromResult(true); }
         public bool SetDhcpConfig(string nicName) { SetCalled = true; return true; }
+        public Task<bool> SetDhcpConfigAsync(string nicName) { SetCalled = true; return Task.FromResult(true); }
         public bool IsRunningAsAdmin() { return true; }
     }
 

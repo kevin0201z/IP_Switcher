@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using IP_Switcher.Models;
 
 namespace IP_Switcher
@@ -43,11 +44,26 @@ namespace IP_Switcher
         bool SetIpConfig(string nicName, NetworkConfig config);
 
         /// <summary>
+        /// 异步设置网卡IP配置
+        /// </summary>
+        /// <param name="nicName">网卡名称</param>
+        /// <param name="config">网络配置</param>
+        /// <returns>是否设置成功</returns>
+        Task<bool> SetIpConfigAsync(string nicName, NetworkConfig config);
+
+        /// <summary>
         /// 设置网卡为DHCP自动获取IP
         /// </summary>
         /// <param name="nicName">网卡名称</param>
         /// <returns>是否设置成功</returns>
         bool SetDhcpConfig(string nicName);
+
+        /// <summary>
+        /// 异步设置网卡为DHCP自动获取IP
+        /// </summary>
+        /// <param name="nicName">网卡名称</param>
+        /// <returns>是否设置成功</returns>
+        Task<bool> SetDhcpConfigAsync(string nicName);
 
         /// <summary>
         /// 验证IP地址格式是否正确
